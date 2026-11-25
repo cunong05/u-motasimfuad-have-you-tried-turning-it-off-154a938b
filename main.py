@@ -12,6 +12,16 @@ def main():
         raise ValueError(f"Entry must be under 200 characters, got {len(ENTRY)}")
     if "\n" in ENTRY or "\r" in ENTRY:
         raise ValueError("Entry must be a single line")
+    if not ENTRY.strip():
+        raise ValueError("Entry must not be empty or whitespace only")
+    if ENTRY != ENTRY.strip():
+        raise ValueError("Entry must not have leading or trailing whitespace")
+    if any(ord(ch) < 32 and ch not in ("\t",) for ch in ENTRY):
+        raise ValueError("Entry must not contain control characters")
+    if not ENTRY.isprintable():
+        raise ValueError("Entry must contain only printable characters")
+    if "  " in ENTRY:
+        raise ValueError("Entry must not contain double spaces")
     outDir = "/output"
     import os
     os.makedirs(outDir, exist_ok=True)
