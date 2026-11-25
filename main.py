@@ -24,9 +24,26 @@ def main():
         raise ValueError("Entry must not contain double spaces")
     outDir = "/output"
     import os
+    import tempfile
     os.makedirs(outDir, exist_ok=True)
-    with open(os.path.join(outDir, "entry.txt"), "w", encoding="utf-8") as f:
-        f.write(ENTRY + "\n")
+    outPath = os.path.join(outDir, "entry.txt")
+    fd, tmpPath = tempfile.mkstemp(dir=outDir, prefix=".entry-", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(ENTRY + "\n")
+        os.replace(tmpPath, outPath)
+    except BaseException:
+        try:
+            os.unlink(tmpPath)
+        except OSError:
+            pass
+        raise
+    with open(outPath, "r", encoding="utf-8") as f:
+        written = f.read().rstrip("\n")
+    if written != ENTRY:
+        raise ValueError("Written entry does not match expected entry")
+    if len(written.splitlines()) != 1:
+        raise ValueError("Written entry must be exactly one line")
     print(f"Wrote entry ({len(ENTRY)} chars) to {outDir}/entry.txt")
 
 
